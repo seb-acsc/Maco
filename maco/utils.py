@@ -337,9 +337,6 @@ def register_extractors(
         if package_venv and package_site_packages in sys.path:
             sys.path.remove(package_site_packages)
 
-        # Remove any modules that were loaded to deconflict with later modules loads
-        [sys.modules.pop(k) for k in set(sys.modules.keys()) - default_loaded_modules]
-
         # Cleanup any symlinks
         if symlink:
             os.remove(symlink)
