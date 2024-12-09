@@ -310,7 +310,7 @@ def register_extractors(
 ):
     package_name = os.path.basename(current_directory)
     parent_directory = os.path.dirname(current_directory)
-    if package_name in sys.modules:
+    if venvs and package_name in sys.modules:
         # this may happen as part of testing if some part of the extractor code was directly imported
         logger.warning(f"Looks like {package_name} is already loaded. "
                        "If your maco extractor overlaps an existing package name this could cause problems.")
@@ -443,14 +443,14 @@ def run_extractor(
 ) -> Union[Dict[str, dict], model.ExtractorModel]:
     """Runs the maco extractor against sample either in current process or child process."""
     if not venv:
-        # dynamic import and execute of the extractor
         key = f"{module_name}_{extractor_class}"
         if key not in _loaded_extractors:
-            # run the maco extractor in current process (fast)
+            # dynamic import of extractor
             mod = importlib.import_module(module_name)
             extractor_cls = mod.__getattribute__(extractor_class)
             extractor = extractor_cls()
         else:
+            # retrieve cached extractor
             extractor = _loaded_extractors[key]
         if extractor.yara_compiled:
             matches = extractor.yara_compiled.match(sample_path)
